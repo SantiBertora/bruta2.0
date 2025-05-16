@@ -1,16 +1,30 @@
-import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig'; // Adjust the import path as necessary
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Usuario autenticado:", user);
+                navigate('/admin'); // Redirigir a la página de administración
+            }
+        });
+
+        return () => unsubscribe();
+    }, [navigate]);
+    
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             console.log("Usuario logueado:", userCredential.user);
+            navigate('/admin'); // Redirigir a la página de administración
         } catch (error) {
             console.error("Error al iniciar sesión:", error.message);
         }
