@@ -1,41 +1,54 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import CategorySection from "./CategorySection";
 
-const MenuTemplate = ({ restaurantId }) => {
-    const [productosPorCategoria, setProductosPorCategoria] = useState({});
+const MenuTemplate = ({ restaurantId, filtroPrincipal, filtroSecundario }) => {
 
-    useEffect(() => {
-        const obtenerProductos = async () => {
-            const q = query(collection(db, `restaurantes/${restaurantId}/productos`));
-            const querySnapshot = await getDocs(q);
-        const productos = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
+    const [productos, setProductos] = useState([]);
 
-        // Agrupar productos por categoría
-        const agrupados = {};
-        productos.forEach(p => {
-            if (!agrupados[p.categoria]) agrupados[p.categoria] = [];
-            agrupados[p.categoria].push(p);
-        });
+  useEffect(() => {
+    const obtenerProductos = async () => {
+        try {
+      const q = query(collection(db, `restaurantes/${restaurantId}/productos`));
+      const querySnapshot = await getDocs(q);
 
-        setProductosPorCategoria(agrupados);
-    };
+      const todosLosProductos = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-        obtenerProductos();
-    }, [restaurantId]);
-
-        return (
-            <div>
-                <h1>Menú</h1>
-                {Object.entries(productosPorCategoria).map(([categoria, productos]) => (
-                <CategorySection key={categoria} categoria={categoria} productos={productos} />
-        ))}
-            </div>
+        const productosFiltrados = todosLosProductos.filter(
+            (producto) => producto.clasificacion === filtroPrincipal.toLowerCase()
         );
-    };
+        
+        setProductos(productosFiltrados);
+    }   catch (error) {
+        console.error("Error al obtener los productos:", error);
+        }
+        };
 
-    export default MenuTemplate;
+    obtenerProductos();
+  }, [restaurantId, filtroPrincipal]);
+
+        
+        
+
+ return (
+    <div>
+      <h1>Menú - {filtroPrincipal}</h1>
+      {productos.length === 0 ? (
+        <p>No hay productos disponibles en esta categoría.</p>
+      ) : (
+        <ul>
+          {productos.map((producto) => (
+            <li key={producto.id}>
+              <strong>{producto.nombre}</strong> - {producto.descripcion} (${producto.precio})
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+export default MenuTemplate;

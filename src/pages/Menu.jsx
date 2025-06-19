@@ -1,11 +1,24 @@
 import Filtros from '../components/Filtros';
 import MenuTemplate from '../components/MenuTemplate';
+import { useState } from 'react';
 
 const Menu = () => {
+
+  const [filtroPrincipal, setFiltroPrincipal] = useState("Bebidas");
+  const [filtroSecundario, setFiltroSecundario] = useState("null");
+
   return (
   <div>
-    <Filtros />
-    <MenuTemplate restaurantId="bruta" />; // o el ID que uses para identificar el restaurante
+    <Filtros
+    filtroPrincipal={filtroPrincipal}
+    setFiltroPrincipal={setFiltroPrincipal}
+    filtroSecundario={filtroSecundario}
+    setFiltroSecundario={setFiltroSecundario} 
+    />
+    <MenuTemplate 
+    restaurantId="bruta" 
+    filtroPrincipal={filtroPrincipal}
+    filtroSecundario={filtroSecundario} />
   </div>
   );
   };

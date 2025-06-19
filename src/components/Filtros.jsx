@@ -2,11 +2,9 @@ import React, { useState, useEffect } from "react";
 import { db } from "../firebase/firebaseConfig"; // Asegúrate de que la ruta sea correcta
 import { collection, getDocs } from "firebase/firestore";
 
-const Filtros = () => {
+const Filtros = ({filtroPrincipal, filtroSecundario, setFiltroPrincipal, setFiltroSecundario}) => {
   const [categorias, setCategorias] = useState([]);
   const filtros = ["Bebidas", "Vinos", "Menú", "Postres y Digestivos"];
-  const [filtroPrincipal, setFiltroPrincipal] = useState("Bebidas");
-  const [filtroSecundario, setFiltroSecundario] = useState("null");
   const cambiarFiltroPrincipal = (filtro) => {
     setFiltroPrincipal(filtro);
     setFiltroSecundario("null"); // Resetea el filtro secundario al cambiar el principal
