@@ -12,7 +12,7 @@ const Login = () => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 console.log("Usuario autenticado:", user);
-                navigate('/admin'); // Redirigir a la página de administración
+                navigate('/menu'); // Redirigir a la página de administración
             }
         });
 
@@ -24,7 +24,7 @@ const Login = () => {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             console.log("Usuario logueado:", userCredential.user);
-            navigate('/admin'); // Redirigir a la página de administración
+            navigate('/menu'); // Redirigir al menú
         } catch (error) {
             console.error("Error al iniciar sesión:", error.message);
         }
