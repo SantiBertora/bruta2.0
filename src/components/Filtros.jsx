@@ -16,12 +16,14 @@ const Filtros = ({filtroPrincipal, filtroSecundario, setFiltroPrincipal, setFilt
   useEffect(() => {
     const obtenerCategorias = async () => {
       try {
-        const q = collection(db, "restaurantes/bruta/categorias");
-        const querySnapshot = await getDocs(q);
+        const ref = collection(db, "restaurantes/bruta/categorias");
+        const querySnapshot = await getDocs(ref);
 
-        const datos = querySnapshot.docs.map((doc) => doc.data());
-
-        setCategorias(datos);
+        const cats = querySnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}))
+        .filter((c) => c.activo !== false);;
+        
+        setCategorias(cats);
+        console.log("Categorias obtenidas:", cats);
       } catch (error) {
         console.error("Error al obtener las categorías:", error);
       }
@@ -31,8 +33,8 @@ const Filtros = ({filtroPrincipal, filtroSecundario, setFiltroPrincipal, setFilt
   }, []);
 
   const categoriasFiltradas = categorias
-    .filter(cat => cat.ubicacion === filtroPrincipal)
-    .map(cat => cat.nombre);
+    .filter((cat) => cat.ubicacion === filtroPrincipal)
+    .map((cat) => ({ value: cat.id, label: cat.nombre}));
 
   return (
     <div>
@@ -54,9 +56,9 @@ const Filtros = ({filtroPrincipal, filtroSecundario, setFiltroPrincipal, setFilt
           onChange={(event) => cambiarFiltroSecundario(event.target.value)}
         >
             <option value="null">Selecciona una categoría</option>
-            {categoriasFiltradas.map((categoria) => (
-                <option key={categoria} value={categoria}>
-                {categoria}
+            {categoriasFiltradas.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                {opt.label}
                 </option>
             ))}
         </select>

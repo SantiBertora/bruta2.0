@@ -17,9 +17,17 @@ const MenuTemplate = ({ restaurantId, filtroPrincipal, filtroSecundario }) => {
         ...doc.data(),
       }));
 
-        const productosFiltrados = todosLosProductos.filter(
-            (producto) => producto.clasificacion === filtroPrincipal.toLowerCase()
+        let productosFiltrados = todosLosProductos.filter(
+            (producto) => (producto.clasificacion || "").toLowerCase() === filtroPrincipal.toLowerCase()
         );
+
+        if (filtroSecundario !== "null") {
+          productosFiltrados = productosFiltrados.filter(
+            (producto) =>
+              (producto.cat || "").toLowerCase() === filtroSecundario.toLowerCase()
+          );
+          console.log(filtroSecundario);
+        }
         
         setProductos(productosFiltrados);
     }   catch (error) {
@@ -28,14 +36,16 @@ const MenuTemplate = ({ restaurantId, filtroPrincipal, filtroSecundario }) => {
         };
 
     obtenerProductos();
-  }, [restaurantId, filtroPrincipal]);
+  }, [restaurantId, filtroPrincipal, filtroSecundario]);
 
         
         
 
  return (
     <div>
-      <h1>Menú - {filtroPrincipal}</h1>
+      <h1>Menú - {filtroPrincipal}
+      {filtroSecundario !== "null" && ` / ${filtroSecundario}`}
+      </h1>
       {productos.length === 0 ? (
         <p>No hay productos disponibles en esta categoría.</p>
       ) : (
