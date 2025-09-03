@@ -1,0 +1,47 @@
+.filtros {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: #fff;
+    border-bottom: 1px solid #ddd;
+
+    #filtro-principal {
+        display: flex;
+        width: 100%;
+        button {
+            flex: 1; // cada botón ocupa el mismo ancho
+            border: none;
+            background: none;
+            padding: 1rem 0; 
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: center;
+
+            &:hover {
+                font-weight: bold; // resaltamos al pasar el mouse
+            }
+
+             &.activo {
+                border-bottom: 2px solid black; // marca el filtro activo
+                font-weight: bold;
+            }
+        }
+    }
+
+    .filtro-secundario {
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-top: 1px solid #eee;
+            font-size: 1rem;
+            background: #fafafa;
+            cursor: pointer;
+            outline: none;
+
+            &:hover {
+                background: #f0f0f0;
+            }
+        }
+    }
+}

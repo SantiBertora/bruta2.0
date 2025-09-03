@@ -1,61 +1,113 @@
-import { useEffect, useState } from "react";
-import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+import React from "react";
 
-const MenuTemplate = ({ restaurantId, filtroPrincipal, filtroSecundario }) => {
+const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos, cepas }) => {
 
-    const [productos, setProductos] = useState([]);
+  // --- Agrupador de vinos por cepa ---
+  const renderProductosPorCepas = (productosCat, tipo) => {
+    // Cepas correspondientes al tipo (tinto/blanco)
+    const cepasTipo = cepas
+      .filter((c) => c.activo && c.ubicacion.toLowerCase() === tipo.toLowerCase())
+      .sort((a, b) => a.prioridad - b.prioridad);
 
-  useEffect(() => {
-    const obtenerProductos = async () => {
-        try {
-      const q = query(collection(db, `restaurantes/${restaurantId}/productos`));
-      const querySnapshot = await getDocs(q);
+    const vinosRender = cepasTipo.map((cepa) => {
+      const vinosDeCepa = productosCat.filter((v) => v.cepa === cepa.id);
+      if (vinosDeCepa.length === 0) return null;
+      return (
+        <div key={cepa.id}>
+          <h4>{cepa.nombre}</h4>
+          <ul>
+            {vinosDeCepa.map((vino) => (
+              <li key={vino.id}>
+                <strong>{vino.nombre}</strong> - {vino.descripcion} (${vino.precio})
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    });
 
-      const todosLosProductos = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+    // Vinos que no coinciden con ninguna cepa activa → "Otros"
+    const vinosOtros = productosCat.filter(
+      (v) => !cepas.some((c) => c.id === v.cepa && c.activo && c.ubicacion.toLowerCase() === tipo.toLowerCase())
+    );
 
-        let productosFiltrados = todosLosProductos.filter(
-            (producto) => (producto.clasificacion || "").toLowerCase() === filtroPrincipal.toLowerCase()
-        );
+    if (vinosOtros.length > 0) {
+      vinosRender.push(
+        <div key={`otros-${tipo}`}>
+          <h4>{tipo === "tinto" ? "Otros Tintos" : "Otros Blancos"}</h4>
+          <ul>
+            {vinosOtros.map((vino) => (
+              <li key={vino.id}>
+                <strong>{vino.nombre}</strong> - {vino.descripcion} (${vino.precio})
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
 
-        if (filtroSecundario !== "null") {
-          productosFiltrados = productosFiltrados.filter(
-            (producto) =>
-              (producto.cat || "").toLowerCase() === filtroSecundario.toLowerCase()
-          );
-          console.log(filtroSecundario);
-        }
-        
-        setProductos(productosFiltrados);
-    }   catch (error) {
-        console.error("Error al obtener los productos:", error);
-        }
-        };
+    return vinosRender;
+  };
 
-    obtenerProductos();
-  }, [restaurantId, filtroPrincipal, filtroSecundario]);
-
-        
-        
-
- return (
+  return (
     <div>
-      <h1>Menú - {filtroPrincipal}
-      {filtroSecundario !== "null" && ` / ${filtroSecundario}`}
-      </h1>
-      {productos.length === 0 ? (
-        <p>No hay productos disponibles en esta categoría.</p>
+      {filtroPrincipal.toLowerCase() === "menú" ? (
+        // --- Render de platos ---
+        productos.length === 0 ? (
+          <p>No hay platos disponibles.</p>
+        ) : (
+          <ul>
+            {productos.map((plato) => (
+              <li key={plato.id}>
+                <strong>{plato.nombre}</strong> - {plato.descripcion} (${plato.precio})
+              </li>
+            ))}
+          </ul>
+        )
+      ) : filtroPrincipal.toLowerCase() === "vinos" ? (
+        // --- Render de vinos ---
+        ["tinto", "blanco", "rosado", "espumante", "por copa"].map((tipo) => {
+          const productosCat = productos.filter((p) => (p.cat || "").toLowerCase() === tipo);
+          if (productosCat.length === 0) return null;
+
+          return (
+            <div key={tipo}>
+              <h2>{tipo.charAt(0).toUpperCase() + tipo.slice(1)}</h2>
+              {tipo === "tinto" || tipo === "blanco"
+                ? renderProductosPorCepas(productosCat, tipo)
+                : (
+                  <ul>
+                    {productosCat.map((vino) => (
+                      <li key={vino.id}>
+                        <strong>{vino.nombre}</strong> - {vino.descripcion} (${vino.precio})
+                      </li>
+                    ))}
+                  </ul>
+                )}
+            </div>
+          );
+        })
       ) : (
-        <ul>
-          {productos.map((producto) => (
-            <li key={producto.id}>
-              <strong>{producto.nombre}</strong> - {producto.descripcion} (${producto.precio})
-            </li>
-          ))}
-        </ul>
+        // --- Otras clasificaciones (bebidas, postres, etc.) ---
+        categorias
+          .filter((c) => c.activo && c.ubicacion === filtroPrincipal)
+          .sort((a, b) => a.prioridad - b.prioridad)
+          .map((cat) => {
+            const productosCat = productos.filter((p) => p.cat === cat.id);
+            if (productosCat.length === 0) return null;
+            return (
+              <div key={cat.id}>
+                <h2>{cat.nombre}</h2>
+                <ul>
+                  {productosCat.map((p) => (
+                    <li key={p.id}>
+                      <strong>{p.nombre}</strong> - {p.descripcion} (${p.precio})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })
       )}
     </div>
   );

@@ -7,7 +7,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/menu" element={<Menu />} />
+      <Route path="/menu" element={<Menu restauranteId={"bruta"}/>} />
       <Route path="/login" element={<Login />} />
     </Routes>
   );

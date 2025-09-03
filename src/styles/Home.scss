@@ -1,0 +1,59 @@
+.home {
+  height: 100vh;
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+
+  .logo {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    img {
+      height: 60px;
+    }
+  }
+
+  .section {
+    height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+
+    .overlay {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 1.5rem;
+      border-radius: 12px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      background: #e63946;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      color: white;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  }
+
+  // Fondos por sección
+  .menu { background: url("src/assets/fondo1.jpg") center/cover no-repeat; }
+  .reserva { background: url("src/assets/fondo2.jpg") center/cover no-repeat; }
+  .eventos { background: url("src/assets/fondo3.jpg") center/cover no-repeat; }
+  .cierre { background: url("src/assets/fondo4.jpg") center/cover no-repeat; }
+}

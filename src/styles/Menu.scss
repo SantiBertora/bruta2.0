@@ -1,0 +1,23 @@
+.menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .logo {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        img {
+      height: 60px;
+        }
+    }
+
+    .filtros-container {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 100;
+        padding: 0.5rem 1rem;
+        width: 100%;
+        border-bottom: 1px solid #eee;
+    }
+}
