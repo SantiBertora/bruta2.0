@@ -1,10 +1,13 @@
 import React from "react";
+import CardBebida from "./cards/CardBebida";
+import CardPlato from "./cards/CardPlato";
+import CardVino from "./cards/CardVino";
+import CardPostre from "./cards/CardPostre";
+import CardCafeDigestivo from "./cards/CardCafeDigestivo";
 
 const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos, cepas }) => {
-
   // --- Agrupador de vinos por cepa ---
   const renderProductosPorCepas = (productosCat, tipo) => {
-    // Cepas correspondientes al tipo (tinto/blanco)
     const cepasTipo = cepas
       .filter((c) => c.activo && c.ubicacion.toLowerCase() === tipo.toLowerCase())
       .sort((a, b) => a.prioridad - b.prioridad);
@@ -15,33 +18,31 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
       return (
         <div key={cepa.id}>
           <h4>{cepa.nombre}</h4>
-          <ul>
-            {vinosDeCepa.map((vino) => (
-              <li key={vino.id}>
-                <strong>{vino.nombre}</strong> - {vino.descripcion} (${vino.precio})
-              </li>
-            ))}
-          </ul>
+          {vinosDeCepa.map((vino) => (
+            <CardVino
+              key={vino.id}
+              nombre={vino.nombre}
+              precio={vino.precio}
+            />
+          ))}
         </div>
       );
     });
 
-    // Vinos que no coinciden con ninguna cepa activa → "Otros"
     const vinosOtros = productosCat.filter(
-      (v) => !cepas.some((c) => c.id === v.cepa && c.activo && c.ubicacion.toLowerCase() === tipo.toLowerCase())
+      (v) =>
+        !cepas.some(
+          (c) => c.id === v.cepa && c.activo && c.ubicacion.toLowerCase() === tipo.toLowerCase()
+        )
     );
 
     if (vinosOtros.length > 0) {
       vinosRender.push(
         <div key={`otros-${tipo}`}>
           <h4>{tipo === "tinto" ? "Otros Tintos" : "Otros Blancos"}</h4>
-          <ul>
-            {vinosOtros.map((vino) => (
-              <li key={vino.id}>
-                <strong>{vino.nombre}</strong> - {vino.descripcion} (${vino.precio})
-              </li>
-            ))}
-          </ul>
+          {vinosOtros.map((vino) => (
+            <CardVino key={vino.id} nombre={vino.nombre} precio={vino.precio} />
+          ))}
         </div>
       );
     }
@@ -56,13 +57,19 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
         productos.length === 0 ? (
           <p>No hay platos disponibles.</p>
         ) : (
-          <ul>
-            {productos.map((plato) => (
-              <li key={plato.id}>
-                <strong>{plato.nombre}</strong> - {plato.descripcion} (${plato.precio})
-              </li>
-            ))}
-          </ul>
+          productos.map((plato) => (
+            <CardPlato
+              key={plato.id}
+              foto={plato.img}
+              nombre={plato.nombre}
+              descripcion={plato.descripcion}
+              precio={plato.precio}
+              veggie={plato.veggie}
+              sinGluten={plato.sinGluten}
+              picante={plato.picante}
+              
+            />
+          ))
         )
       ) : filtroPrincipal.toLowerCase() === "vinos" ? (
         // --- Render de vinos ---
@@ -71,19 +78,13 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
           if (productosCat.length === 0) return null;
 
           return (
-            <div key={tipo}>
+            <div key={tipo} id={`cat-${tipo}`}>
               <h2>{tipo.charAt(0).toUpperCase() + tipo.slice(1)}</h2>
               {tipo === "tinto" || tipo === "blanco"
                 ? renderProductosPorCepas(productosCat, tipo)
-                : (
-                  <ul>
-                    {productosCat.map((vino) => (
-                      <li key={vino.id}>
-                        <strong>{vino.nombre}</strong> - {vino.descripcion} (${vino.precio})
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                : productosCat.map((vino) => (
+                    <CardVino key={vino.id} nombre={vino.nombre} precio={vino.precio} />
+                  ))}
             </div>
           );
         })
@@ -95,16 +96,40 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
           .map((cat) => {
             const productosCat = productos.filter((p) => p.cat === cat.id);
             if (productosCat.length === 0) return null;
+
             return (
-              <div key={cat.id}>
+              <div key={cat.id} id={`cat-${cat.id}`}>
                 <h2>{cat.nombre}</h2>
-                <ul>
-                  {productosCat.map((p) => (
-                    <li key={p.id}>
-                      <strong>{p.nombre}</strong> - {p.descripcion} (${p.precio})
-                    </li>
-                  ))}
-                </ul>
+                {productosCat.map((p) => {
+                  if (filtroPrincipal.toLowerCase() === "bebidas") {
+                    return (
+                      <CardBebida
+                        key={p.id}
+                        foto={p.img}
+                        nombre={p.nombre}
+                        descripcion={p.descripcion}
+                        precio={p.precio}
+                        picante={p.picante}
+                      />
+                    );
+                  }
+                  if (filtroPrincipal.toLowerCase() === "postres y digestivos") {
+                    if (cat.nombre.toLowerCase().includes("café") || cat.nombre.toLowerCase().includes("digestivo")) {
+                      return <CardCafeDigestivo key={p.id} nombre={p.nombre} precio={p.precio} />;
+                    }
+                    return (
+                      <CardPostre
+                        key={p.id}
+                        foto={p.img}
+                        nombre={p.nombre}
+                        descripcion={p.descripcion}
+                        precio={p.precio}
+                        sinGluten={p.sinGluten}
+                      />
+                    );
+                  }
+                  return null;
+                })}
               </div>
             );
           })

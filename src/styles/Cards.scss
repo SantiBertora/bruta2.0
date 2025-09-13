@@ -1,0 +1,73 @@
+.card {
+  width: 280px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background: #fff;
+  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+
+  &-content {
+    padding: 1rem;
+  }
+
+  &-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  &-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.75rem;
+  }
+
+  &-price {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #b71c1c; // rojo vino
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+
+  img.icon-picante {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+
+  img.icon-veggie {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+
+  img.icon-sin-gluten {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+}

@@ -11,6 +11,20 @@ const Filtros = ({filtroPrincipal, filtroSecundario, setFiltroPrincipal, setFilt
 
   const cambiarFiltroSecundario = (filtro) => {
     setFiltroSecundario(filtro);
+
+    // Desplaza suavemente a la sección indicada
+
+    if (["Bebidas", "Vinos", "Postres y Digestivos"].includes(filtroPrincipal)) {
+      if (filtro !== "null") {
+        const section = document.getElementById(`cat-${filtro}`) || document.getElementById(`vino-${filtro.toLowerCase()}`);
+        if (section) {
+          const filtros = document.querySelector(".filtros");
+          const yOffset = -((filtros?.offsetHeight || 0) + 16);
+          const y = section.getBoundingClientRect().top + window.scrollY + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }
+    }
   };
 
   const categoriasFiltradas = categorias

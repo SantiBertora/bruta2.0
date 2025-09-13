@@ -1,12 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+
+
 const Home = () => {
   return (
     <div className="home">
       {/* Logo fijo */}
       <header className="logo">
-        <img src="src/assets/logo.png" alt="Bruta Logo" />
+        <img src="https://firebasestorage.googleapis.com/v0/b/bruta2.firebasestorage.app/o/Home%2Flogo.png?alt=media&token=4c38cade-3f8c-41b4-97b1-b4769140d586" alt="Bruta Logo" />
       </header>
 
       {/* Secciones */}
@@ -22,9 +24,9 @@ const Home = () => {
 
       <section className="section reserva">
         <div className="overlay">
-          <h1>Visitanos en Palermo</h1>
-          <p>Dirección: Gurruchaga 1234, CABA</p>
-          <button>Reservar</button>
+          <h1>Visitanos en Pocitos</h1>
+          <p>Dirección: Luis de La Torre 818</p>
+          <button  >Reservar</button>
         </div>
       </section>
 
@@ -38,7 +40,7 @@ const Home = () => {
 
       <section className="section cierre">
         <div className="overlay">
-          <p>Seguinos en <a href="https://instagram.com/bruta" target="_blank">Instagram</a></p>
+          <p>Seguinos en <a href="https://www.instagram.com/restaurantebruta/" target="_blank">Instagram</a></p>
           <small>© 2025 Bruta - Todos los derechos reservados</small>
         </div>
       </section>

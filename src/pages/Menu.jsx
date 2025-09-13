@@ -63,7 +63,7 @@ const Menu = ({ restauranteId }) => {
   return (
   <div className="menu">
     <header className="logo">
-        <img src="src/assets/logo.png" alt="Bruta Logo" />
+        <img src="https://firebasestorage.googleapis.com/v0/b/bruta2.firebasestorage.app/o/Home%2Flogo.png?alt=media&token=4c38cade-3f8c-41b4-97b1-b4769140d586" alt="Bruta Logo" />
       </header>
       <div className="filtros-container">
     <Filtros
@@ -78,7 +78,7 @@ const Menu = ({ restauranteId }) => {
     filtroPrincipal={filtroPrincipal}
     filtroSecundario={filtroSecundario}
     categorias={categorias}
-    productos={productosFiltrados}
+    productos={productosFiltradosPlatos}
     cepas={cepas} />
   </div>
   );
