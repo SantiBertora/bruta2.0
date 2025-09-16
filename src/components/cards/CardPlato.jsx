@@ -1,6 +1,10 @@
 import React from "react";
+import { useAuth } from "../../context/AuthContext";
+import UploadButton from "../../utils/UploadButton";
 
-const CardPlato = ({ foto, nombre, descripcion, precio, veggie, sinGluten, picante }) => {
+const CardPlato = ({ foto, nombre, descripcion, precio, veggie, sinGluten, picante, productId }) => {
+    const { isAdmin, restauranteId } = useAuth();
+  
   return (
     <div className="card plato">
       {foto && <img src={foto} alt={nombre} className="card-img" />}
@@ -29,7 +33,18 @@ const CardPlato = ({ foto, nombre, descripcion, precio, veggie, sinGluten, pican
     Picante
   </span>
 )}
-
+{isAdmin && (
+          <div className="admin-controls">
+            <UploadButton
+              restauranteId={restauranteId}
+              productId={productId}
+              onUpload={(url) => {
+                console.log("Nueva URL de imagen:", url);
+                // Aquí puedes actualizar el producto en tu DB
+              }}
+            />
+          </div>
+        )}
         </div>
       </div>
     </div>

@@ -23,6 +23,8 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               key={vino.id}
               nombre={vino.nombre}
               precio={vino.precio}
+              productId={vino.id}
+              foto={vino.img}
             />
           ))}
         </div>
@@ -41,7 +43,12 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
         <div key={`otros-${tipo}`}>
           <h4>{tipo === "tinto" ? "Otros Tintos" : "Otros Blancos"}</h4>
           {vinosOtros.map((vino) => (
-            <CardVino key={vino.id} nombre={vino.nombre} precio={vino.precio} />
+            <CardVino 
+            key={vino.id} 
+            nombre={vino.nombre} 
+            precio={vino.precio} 
+            productId={vino.id}
+            foto={vino.img} />
           ))}
         </div>
       );
@@ -67,7 +74,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               veggie={plato.veggie}
               sinGluten={plato.sinGluten}
               picante={plato.picante}
-              
+              productId={plato.id}
             />
           ))
         )
@@ -83,7 +90,13 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               {tipo === "tinto" || tipo === "blanco"
                 ? renderProductosPorCepas(productosCat, tipo)
                 : productosCat.map((vino) => (
-                    <CardVino key={vino.id} nombre={vino.nombre} precio={vino.precio} />
+                    <CardVino 
+                    key={vino.id} 
+                    nombre={vino.nombre} 
+                    precio={vino.precio}
+                    productId={vino.id} 
+                    foto={vino.img}
+                    />
                   ))}
             </div>
           );
@@ -110,12 +123,18 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                         descripcion={p.descripcion}
                         precio={p.precio}
                         picante={p.picante}
+                        productId={p.id}
                       />
                     );
                   }
                   if (filtroPrincipal.toLowerCase() === "postres y digestivos") {
                     if (cat.nombre.toLowerCase().includes("café") || cat.nombre.toLowerCase().includes("digestivo")) {
-                      return <CardCafeDigestivo key={p.id} nombre={p.nombre} precio={p.precio} />;
+                      return <CardCafeDigestivo 
+                      key={p.id} 
+                      nombre={p.nombre} 
+                      precio={p.precio} 
+                      productId={p.id}
+                      />;
                     }
                     return (
                       <CardPostre
@@ -125,6 +144,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                         descripcion={p.descripcion}
                         precio={p.precio}
                         sinGluten={p.sinGluten}
+                        productId={p.id}
                       />
                     );
                   }

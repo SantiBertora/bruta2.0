@@ -1,6 +1,10 @@
 import React from "react";
+import { useAuth } from "../../context/AuthContext";
+import UploadButton from "../../utils/UploadButton";
 
-const CardPostre = ({ foto, nombre, descripcion, precio, sinGluten }) => {
+const CardPostre = ({ foto, nombre, descripcion, precio, sinGluten, productId }) => {
+    const { isAdmin, restauranteId } = useAuth();
+  
   return (
     <div className="card postre">
       {foto && <img src={foto} alt={nombre} className="card-img" />}
@@ -13,6 +17,18 @@ const CardPostre = ({ foto, nombre, descripcion, precio, sinGluten }) => {
       alt="Sin Gluten"
       className="icon-sin-gluten"
     /> Sin Gluten</span>}
+    {isAdmin && (
+          <div className="admin-controls">
+            <UploadButton
+              restauranteId={restauranteId}
+              productId={productId}
+              onUpload={(url) => {
+                console.log("Nueva URL de imagen:", url);
+                // Aquí puedes actualizar el producto en tu DB
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

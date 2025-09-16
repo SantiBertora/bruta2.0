@@ -74,6 +74,7 @@ const Menu = ({ restauranteId }) => {
     setFiltroSecundario={setFiltroSecundario} 
     />
     </div>
+    
     <MenuTemplate 
     filtroPrincipal={filtroPrincipal}
     filtroSecundario={filtroSecundario}
