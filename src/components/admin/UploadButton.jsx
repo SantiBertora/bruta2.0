@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage, db } from "../firebase/firebaseConfig"; // ajusta la ruta según tu proyecto
+import { storage, db } from "../../firebase/firebaseConfig"; // ajusta la ruta según tu proyecto
 import { doc, updateDoc } from "firebase/firestore";
 
 const UploadButton = ({ productId, onUpload, restauranteId }) => {

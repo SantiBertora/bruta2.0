@@ -1,8 +1,9 @@
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
-import UploadButton from "../../utils/UploadButton";
+import UploadButton from "../admin/UploadButton";
+import EditProductButton from "../admin/EditProductButton";
 
-const CardVino = ({ nombre, precio, productId, foto }) => {
+const CardVino = ({ nombre, precio, productId, foto, descripcion }) => {
     const { isAdmin, restauranteId } = useAuth();
   
   return (
@@ -21,7 +22,10 @@ const CardVino = ({ nombre, precio, productId, foto }) => {
                 // Aquí puedes actualizar el producto en tu DB
               }}
             />
-          </div>
+          <EditProductButton
+              product={{ id: productId, nombre, descripcion, precio }}
+              />
+              </div>
         )}
 
       </div>
