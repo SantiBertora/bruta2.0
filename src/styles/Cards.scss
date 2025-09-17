@@ -71,3 +71,18 @@
     object-fit: contain;
   }
 }
+
+.card.inactive {
+  opacity: 0.5;
+  border: 2px dashed #aaa;
+}
+
+.badge.inactive-badge {
+  background: #ccc;
+  color: #333;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  display: inline-block;
+}

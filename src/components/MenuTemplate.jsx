@@ -4,8 +4,11 @@ import CardPlato from "./cards/CardPlato";
 import CardVino from "./cards/CardVino";
 import CardPostre from "./cards/CardPostre";
 import CardCafeDigestivo from "./cards/CardCafeDigestivo";
+import { useAuth } from "../context/AuthContext";
 
 const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos, cepas }) => {
+  const { user } = useAuth();
+
   // --- Agrupador de vinos por cepa ---
   const renderProductosPorCepas = (productosCat, tipo) => {
     const cepasTipo = cepas
@@ -25,6 +28,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               precio={vino.precio}
               productId={vino.id}
               foto={vino.img}
+              isInactive={user && !vino.activo}
             />
           ))}
         </div>
@@ -43,12 +47,14 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
         <div key={`otros-${tipo}`}>
           <h4>{tipo === "tinto" ? "Otros Tintos" : "Otros Blancos"}</h4>
           {vinosOtros.map((vino) => (
-            <CardVino 
-            key={vino.id} 
-            nombre={vino.nombre} 
-            precio={vino.precio} 
-            productId={vino.id}
-            foto={vino.img} />
+            <CardVino
+              key={vino.id}
+              nombre={vino.nombre}
+              precio={vino.precio}
+              productId={vino.id}
+              foto={vino.img}
+              isInactive={user && !vino.activo}
+            />
           ))}
         </div>
       );
@@ -61,10 +67,10 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
     <div>
       {filtroPrincipal.toLowerCase() === "menú" ? (
         // --- Render de platos ---
-        productos.length === 0 ? (
+        (user ? productos : productos.filter((p) => p.activo)).length === 0 ? (
           <p>No hay platos disponibles.</p>
         ) : (
-          productos.map((plato) => (
+          (user ? productos : productos.filter((p) => p.activo)).map((plato) => (
             <CardPlato
               key={plato.id}
               foto={plato.img}
@@ -75,13 +81,16 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               sinGluten={plato.sinGluten}
               picante={plato.picante}
               productId={plato.id}
+              isInactive={user && !plato.activo}
             />
           ))
         )
       ) : filtroPrincipal.toLowerCase() === "vinos" ? (
         // --- Render de vinos ---
         ["tinto", "blanco", "rosado", "espumante", "por copa"].map((tipo) => {
-          const productosCat = productos.filter((p) => (p.cat || "").toLowerCase() === tipo);
+          const productosCat = (user ? productos : productos.filter((p) => p.activo)).filter(
+            (p) => (p.cat || "").toLowerCase() === tipo
+          );
           if (productosCat.length === 0) return null;
 
           return (
@@ -90,12 +99,13 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               {tipo === "tinto" || tipo === "blanco"
                 ? renderProductosPorCepas(productosCat, tipo)
                 : productosCat.map((vino) => (
-                    <CardVino 
-                    key={vino.id} 
-                    nombre={vino.nombre} 
-                    precio={vino.precio}
-                    productId={vino.id} 
-                    foto={vino.img}
+                    <CardVino
+                      key={vino.id}
+                      nombre={vino.nombre}
+                      precio={vino.precio}
+                      productId={vino.id}
+                      foto={vino.img}
+                      isInactive={user && !vino.activo}
                     />
                   ))}
             </div>
@@ -107,7 +117,9 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
           .filter((c) => c.activo && c.ubicacion === filtroPrincipal)
           .sort((a, b) => a.prioridad - b.prioridad)
           .map((cat) => {
-            const productosCat = productos.filter((p) => p.cat === cat.id);
+            const productosCat = (user ? productos : productos.filter((p) => p.activo)).filter(
+              (p) => p.cat === cat.id
+            );
             if (productosCat.length === 0) return null;
 
             return (
@@ -124,17 +136,24 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                         precio={p.precio}
                         picante={p.picante}
                         productId={p.id}
+                        isInactive={user && !p.activo}
                       />
                     );
                   }
                   if (filtroPrincipal.toLowerCase() === "postres y digestivos") {
-                    if (cat.nombre.toLowerCase().includes("café") || cat.nombre.toLowerCase().includes("digestivo")) {
-                      return <CardCafeDigestivo 
-                      key={p.id} 
-                      nombre={p.nombre} 
-                      precio={p.precio} 
-                      productId={p.id}
-                      />;
+                    if (
+                      cat.nombre.toLowerCase().includes("café") ||
+                      cat.nombre.toLowerCase().includes("digestivo")
+                    ) {
+                      return (
+                        <CardCafeDigestivo
+                          key={p.id}
+                          nombre={p.nombre}
+                          precio={p.precio}
+                          productId={p.id}
+                          isInactive={user && !p.activo}
+                        />
+                      );
                     }
                     return (
                       <CardPostre
@@ -145,6 +164,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                         precio={p.precio}
                         sinGluten={p.sinGluten}
                         productId={p.id}
+                        isInactive={user && !p.activo}
                       />
                     );
                   }
