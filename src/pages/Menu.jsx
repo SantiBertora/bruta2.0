@@ -3,9 +3,11 @@ import MenuTemplate from '../components/MenuTemplate';
 import { useState , useEffect } from 'react';
 import { db } from "../firebase/firebaseConfig"; // Asegúrate de que la ruta sea correcta
 import { collection, getDocs, query } from "firebase/firestore";
+import { useAuth } from '../context/AuthContext';
+import CreateProductButton from '../components/admin/CreateProductButton';
 
 const Menu = ({ restauranteId }) => {
-
+  const { isAdmin } = useAuth();
   const [categorias, setCategorias] = useState([]);
   const [productos, setProductos] = useState([]);
   const [cepas, setCepas] = useState([]);
@@ -74,7 +76,8 @@ const Menu = ({ restauranteId }) => {
     setFiltroSecundario={setFiltroSecundario} 
     />
     </div>
-    
+    {isAdmin && <CreateProductButton cepas={cepas} categorias={categorias} onCreate={() => console.log("Nuevo producto creado")} />}
+
     <MenuTemplate 
     filtroPrincipal={filtroPrincipal}
     filtroSecundario={filtroSecundario}
