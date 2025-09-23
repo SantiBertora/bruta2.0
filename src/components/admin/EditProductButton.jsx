@@ -10,17 +10,18 @@ const EditProductButton = ({ product, onUpdated }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    nombre: product.nombre || "",
-    descripcion: product.descripcion || "",
-    precio: product.precio ?? "",
-    picante: !!product.picante,
-    veggie: !!product.veggie,
-    sinGluten: !!product.sinGluten,
-    activo: !!product.activo,
+    nombre: "",
+    descripcion: "",
+    precio: "",
+    picante: false,
+    veggie: false,
+    sinGluten: false,
+    activo: false,
   });
 
   useEffect(() => {
-    // sincroniza si product cambia externamente
+      if (product) {
+        console.log("Producto recibido:", product);
     setFormData({
       nombre: product.nombre || "",
       descripcion: product.descripcion || "",
@@ -30,6 +31,7 @@ const EditProductButton = ({ product, onUpdated }) => {
       sinGluten: !!product.sinGluten,
       activo: !!product.activo,
     });
+  }
   }, [product]);
 
   // cerrar con Escape
@@ -122,7 +124,7 @@ const EditProductButton = ({ product, onUpdated }) => {
         <h3 style={{ marginTop: 0 }}>Editar Producto</h3>
         <form onSubmit={handleSubmit}>
           <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input type="checkbox" name="activo" checked={formData.activo} onChange={handleChange} />
+              <input type="checkbox" name="activo" checked={formData.activo} onChange={(e) => setFormData({ ...formData, activo: e.target.checked})} />
               Activo
             </label>
           <input

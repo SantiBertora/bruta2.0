@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import UploadButton from "../admin/UploadButton";
 import EditProductButton from "../admin/EditProductButton";
 
-const CardBebida = ({ foto, nombre, descripcion, precio, picante, productId, isInactive }) => {
+const CardBebida = ({ foto, nombre, descripcion, precio, picante, productId, isInactive, activo }) => {
   const { isAdmin, restauranteId } = useAuth();
 
   return (
@@ -28,7 +28,7 @@ const CardBebida = ({ foto, nombre, descripcion, precio, picante, productId, isI
         {isAdmin && (
           <div className="admin-controls">
             <UploadButton restauranteId={restauranteId} productId={productId} />
-            <EditProductButton product={{ id: productId, nombre, descripcion, precio, picante }} />
+            <EditProductButton product={{ id: productId, nombre, descripcion, precio, picante, activo }} />
           </div>
         )}
       </div>

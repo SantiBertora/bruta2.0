@@ -29,6 +29,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               productId={vino.id}
               foto={vino.img}
               isInactive={user && !vino.activo}
+              activo={vino.activo}
             />
           ))}
         </div>
@@ -54,6 +55,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               productId={vino.id}
               foto={vino.img}
               isInactive={user && !vino.activo}
+              activo={vino.activo}
             />
           ))}
         </div>
@@ -82,6 +84,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               picante={plato.picante}
               productId={plato.id}
               isInactive={user && !plato.activo}
+              activo={plato.activo}
             />
           ))
         )
@@ -106,6 +109,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                       productId={vino.id}
                       foto={vino.img}
                       isInactive={user && !vino.activo}
+                      activo={vino.activo}
                     />
                   ))}
             </div>
@@ -137,6 +141,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                         picante={p.picante}
                         productId={p.id}
                         isInactive={user && !p.activo}
+                        activo={p.activo}
                       />
                     );
                   }
@@ -152,6 +157,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                           precio={p.precio}
                           productId={p.id}
                           isInactive={user && !p.activo}
+                          activo={p.activo}
                         />
                       );
                     }
@@ -165,6 +171,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                         sinGluten={p.sinGluten}
                         productId={p.id}
                         isInactive={user && !p.activo}
+                        activo={p.activo}
                       />
                     );
                   }
