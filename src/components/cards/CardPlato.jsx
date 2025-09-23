@@ -2,8 +2,9 @@ import React from "react";
 import { useAuth } from "../../context/AuthContext";
 import UploadButton from "../admin/UploadButton";
 import EditProductButton from "../admin/EditProductButton";
+import DeleteProductButton from "../admin/DeleteProductButton";
 
-const CardPlato = ({ foto, nombre, descripcion, precio, veggie, sinGluten, picante, productId, isInactive, activo }) => {
+const CardPlato = ({ foto, nombre, descripcion, precio, veggie, sinGluten, picante, productId, isInactive, activo, fetchProductos }) => {
   const { isAdmin, restauranteId } = useAuth();
 
   return (
@@ -49,7 +50,8 @@ const CardPlato = ({ foto, nombre, descripcion, precio, veggie, sinGluten, pican
         {isAdmin && (
           <div className="admin-controls">
             <UploadButton restauranteId={restauranteId} productId={productId} />
-            <EditProductButton product={{ id: productId, nombre, descripcion, precio, picante, activo, sinGluten, veggie }} />
+            <EditProductButton product={{ id: productId, nombre, descripcion, precio, picante, activo, sinGluten, veggie }} onUpdated={fetchProductos} />
+            <DeleteProductButton product={{ id: productId, nombre}} onDeleted={fetchProductos} />
           </div>
         )}
       </div>

@@ -6,7 +6,7 @@ import CardPostre from "./cards/CardPostre";
 import CardCafeDigestivo from "./cards/CardCafeDigestivo";
 import { useAuth } from "../context/AuthContext";
 
-const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos, cepas }) => {
+const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos, cepas, fetchProductos }) => {
   const { user } = useAuth();
 
   // --- Agrupador de vinos por cepa ---
@@ -30,6 +30,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               foto={vino.img}
               isInactive={user && !vino.activo}
               activo={vino.activo}
+              fetchProductos={fetchProductos} // PASAMOS la función
             />
           ))}
         </div>
@@ -56,6 +57,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               foto={vino.img}
               isInactive={user && !vino.activo}
               activo={vino.activo}
+              fetchProductos={fetchProductos} // PASAMOS la función
             />
           ))}
         </div>
@@ -68,7 +70,6 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
   return (
     <div>
       {filtroPrincipal.toLowerCase() === "menú" ? (
-        // --- Render de platos ---
         (user ? productos : productos.filter((p) => p.activo)).length === 0 ? (
           <p>No hay platos disponibles.</p>
         ) : (
@@ -85,11 +86,11 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               productId={plato.id}
               isInactive={user && !plato.activo}
               activo={plato.activo}
+              fetchProductos={fetchProductos} // PASAMOS la función
             />
           ))
         )
       ) : filtroPrincipal.toLowerCase() === "vinos" ? (
-        // --- Render de vinos ---
         ["tinto", "blanco", "rosado", "espumante", "por copa"].map((tipo) => {
           const productosCat = (user ? productos : productos.filter((p) => p.activo)).filter(
             (p) => (p.cat || "").toLowerCase() === tipo
@@ -110,13 +111,13 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                       foto={vino.img}
                       isInactive={user && !vino.activo}
                       activo={vino.activo}
+                      fetchProductos={fetchProductos} // PASAMOS la función
                     />
                   ))}
             </div>
           );
         })
       ) : (
-        // --- Otras clasificaciones (bebidas, postres, etc.) ---
         categorias
           .filter((c) => c.activo && c.ubicacion === filtroPrincipal)
           .sort((a, b) => a.prioridad - b.prioridad)
@@ -142,6 +143,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                         productId={p.id}
                         isInactive={user && !p.activo}
                         activo={p.activo}
+                        fetchProductos={fetchProductos} // PASAMOS la función
                       />
                     );
                   }
@@ -158,6 +160,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                           productId={p.id}
                           isInactive={user && !p.activo}
                           activo={p.activo}
+                          fetchProductos={fetchProductos} // PASAMOS la función
                         />
                       );
                     }
@@ -172,6 +175,7 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
                         productId={p.id}
                         isInactive={user && !p.activo}
                         activo={p.activo}
+                        fetchProductos={fetchProductos} // PASAMOS la función
                       />
                     );
                   }
