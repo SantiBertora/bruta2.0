@@ -46,15 +46,7 @@ const DeleteProductButton = ({ product, onDeleted }) => {
       className="btn-delete"
       onClick={handleDelete}
       disabled={loading}
-      style={{
-        padding: "6px 10px",
-        marginLeft: "8px",
-        background: "#e53935",
-        color: "white",
-        border: "none",
-        borderRadius: "4px",
-        cursor: "pointer",
-      }}
+      
     >
       {loading ? "Eliminando..." : "🗑️ Eliminar"}
     </button>

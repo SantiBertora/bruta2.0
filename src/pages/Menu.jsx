@@ -2,9 +2,12 @@ import Filtros from '../components/Filtros';
 import MenuTemplate from '../components/MenuTemplate';
 import { useState , useEffect } from 'react';
 import { db } from "../firebase/firebaseConfig";
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, query, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { useAuth } from '../context/AuthContext';
 import CreateProductButton from '../components/admin/CreateProductButton';
+import CategoriasOrdenables from '../components/admin/CategoriasOrdenables';
+import CrearCategoria from '../components/admin/CrearCategoria';
+import CepasOrdenables from '../components/admin/CepasOrdenables';
 
 const Menu = ({ restauranteId }) => {
   const { isAdmin } = useAuth();
@@ -71,6 +74,46 @@ const Menu = ({ restauranteId }) => {
     return true;
   });
 
+  const guardarCambios = async (nuevasCategorias) => {
+    try {
+      const updates = nuevasCategorias.map(async (cat) => {
+        const ref = doc(db, `restaurantes/${restauranteId}/categorias/${cat.id}`);
+        await updateDoc(ref, {
+          prioridad: cat.prioridad ?? 0,
+        });
+      });
+
+      await Promise.all(updates);
+      alert("✅ Prioridades actualizadas correctamente");
+    } catch (err) {
+      console.error("Error al actualizar prioridades:", err);
+      alert("❌ Hubo un error al guardar los cambios.");
+    }
+  };
+
+  const eliminarCategoria = async (categoriaId) => {
+  try {
+    const confirm = window.confirm("¿Seguro que deseas eliminar esta categoría?");
+    if (!confirm) return;
+
+    const ref = doc(db, `restaurantes/${restauranteId}/categorias/${categoriaId}`);
+    await deleteDoc(ref);
+
+    // Refrescar categorías
+    const refCats = collection(db, `restaurantes/${restauranteId}/categorias`);
+    const querySnapshot = await getDocs(refCats);
+    const cats = querySnapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((c) => c.activo !== false);
+    setCategorias(cats);
+
+    alert("✅ Categoría eliminada correctamente");
+  } catch (err) {
+    console.error("Error al eliminar categoría:", err);
+    alert("❌ Hubo un error al eliminar la categoría.");
+  }
+};
+
   return (
     <div className="menu">
       <header className="logo">
@@ -86,6 +129,40 @@ const Menu = ({ restauranteId }) => {
           setFiltroSecundario={setFiltroSecundario} 
         />
       </div>
+      {isAdmin && (
+  <CrearCategoria 
+    restauranteId={restauranteId} 
+    onCreate={() => {
+      // Refrescar categorías desde Firebase
+      const refCats = collection(db, `restaurantes/${restauranteId}/categorias`);
+      getDocs(refCats).then((querySnapshot) => {
+        const cats = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setCategorias(cats);
+      });
+    }}
+  />
+)}
+
+<CategoriasOrdenables categorias={categorias} onSave={guardarCambios} onDelete={eliminarCategoria} />
+{isAdmin && (
+  <CepasOrdenables
+    restauranteId={restauranteId}
+    cepas={cepas}
+    onSave={async (nuevasCepas) => {
+      try {
+        const updates = nuevasCepas.map(c => {
+          const ref = doc(db, `restaurantes/${restauranteId}/cepas/${c.id}`);
+          return updateDoc(ref, { prioridad: c.prioridad ?? 0 });
+        });
+        await Promise.all(updates);
+        alert("✅ Prioridades de cepas actualizadas");
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error al guardar prioridades de cepas");
+      }
+    }}
+  />
+)}
 
       {isAdmin && (
         <CreateProductButton 
