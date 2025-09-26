@@ -7,10 +7,15 @@ const CepasOrdenables = ({ restauranteId, cepas = [], onSave }) => {
   const [data, setData] = useState({});
   const [openGroup, setOpenGroup] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newCepa, setNewCepa] = useState({ nombre: "", activo: true, ubicacion: "", prioridad: 0 });
+  const [isOpen, setIsOpen] = useState(false); // 👉 desplegable principal
+  const [newCepa, setNewCepa] = useState({
+    nombre: "",
+    activo: true,
+    ubicacion: "",
+    prioridad: 0,
+  });
 
   useEffect(() => {
-    // Agrupamos por ubicación y ordenamos por prioridad
     const grupos = {};
     cepas.forEach((c) => {
       const key = c.ubicacion || "sin_ubicacion";
@@ -39,10 +44,9 @@ const CepasOrdenables = ({ restauranteId, cepas = [], onSave }) => {
     try {
       const ref = doc(db, `restaurantes/${restauranteId}/cepas/${cepaId}`);
       await deleteDoc(ref);
-      // Actualizamos localmente
       const newData = { ...data };
       Object.keys(newData).forEach((key) => {
-        newData[key] = newData[key].filter(c => c.id !== cepaId);
+        newData[key] = newData[key].filter((c) => c.id !== cepaId);
       });
       setData(newData);
     } catch (err) {
@@ -58,7 +62,7 @@ const CepasOrdenables = ({ restauranteId, cepas = [], onSave }) => {
       const ref = doc(db, `restaurantes/${restauranteId}/cepas`, newCepa.nombre);
       await setDoc(ref, newCepa);
       const key = newCepa.ubicacion || "sin_ubicacion";
-      setData(prev => ({
+      setData((prev) => ({
         ...prev,
         [key]: [...(prev[key] || []), { id: newCepa.nombre, ...newCepa }],
       }));
@@ -82,82 +86,133 @@ const CepasOrdenables = ({ restauranteId, cepas = [], onSave }) => {
 
   return (
     <div className="cepas-admin">
-      <h3>Ordenar Cepas</h3>
+      {/* 🔽 Botón/título para abrir/cerrar todo el panel */}
+      <h3
+        className="toggle-main"
+        onClick={() => setIsOpen(!isOpen)}
+        style={{ cursor: "pointer" }}
+      >
+        {isOpen ? "▼" : "▶"} Ordenar Cepas
+      </h3>
 
-      {Object.keys(data).map((ubicacion) => (
-        <div key={ubicacion} className="ubicacion-group">
-          <button
-            className="toggle-group"
-            onClick={() => setOpenGroup(openGroup === ubicacion ? null : ubicacion)}
-          >
-            {openGroup === ubicacion ? "▼" : "▶"} {ubicacion}
-          </button>
+      {isOpen && (
+        <div className="cepas-content">
+          {Object.keys(data).map((ubicacion) => (
+            <div key={ubicacion} className="ubicacion-group">
+              <button
+                className="toggle-group"
+                onClick={() =>
+                  setOpenGroup(openGroup === ubicacion ? null : ubicacion)
+                }
+              >
+                {openGroup === ubicacion ? "▼" : "▶"} {ubicacion}
+              </button>
 
-          {openGroup === ubicacion && (
-            <DragDropContext onDragEnd={(result) => handleDragEnd(result, ubicacion)}>
-              <Droppable droppableId={ubicacion}>
-                {(provided) => (
-                  <ul {...provided.droppableProps} ref={provided.innerRef}>
-                    {data[ubicacion].map((cepa, index) => (
-                      <Draggable key={cepa.id} draggableId={cepa.id} index={index}>
-                        {(provided) => (
-                          <li
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
+              {openGroup === ubicacion && (
+                <DragDropContext
+                  onDragEnd={(result) => handleDragEnd(result, ubicacion)}
+                >
+                  <Droppable droppableId={ubicacion}>
+                    {(provided) => (
+                      <ul
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        className="cepas-list"
+                      >
+                        {data[ubicacion].map((cepa, index) => (
+                          <Draggable
+                            key={cepa.id}
+                            draggableId={cepa.id}
+                            index={index}
                           >
-                            {cepa.nombre} (prioridad: {cepa.prioridad ?? index})
-                            <button onClick={() => handleDelete(cepa.id)}>🗑️</button>
-                          </li>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </ul>
-                )}
-              </Droppable>
-            </DragDropContext>
-          )}
+                            {(provided) => (
+                              <li
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="cepa-item"
+                              >
+                                {cepa.nombre}{" "}
+                                <span className="prioridad">
+                                  (prioridad: {cepa.prioridad ?? index})
+                                </span>
+                                <button
+                                  className="btn-delete"
+                                  onClick={() => handleDelete(cepa.id)}
+                                >
+                                  🗑️
+                                </button>
+                              </li>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </ul>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              )}
+            </div>
+          ))}
+
+          <button className="btn-save" onClick={handleSave}>
+            Guardar cambios
+          </button>
+          <button className="btn-create" onClick={() => setIsModalOpen(true)}>
+            ➕ Crear Cepa
+          </button>
         </div>
-      ))}
+      )}
 
-      <button className="btn-save" onClick={handleSave}>Guardar cambios</button>
-      <button className="btn-create" onClick={() => setIsModalOpen(true)}>➕ Crear Cepa</button>
-
+      {/* Modal para crear nueva cepa */}
       {isModalOpen && (
         <div className="modal" onMouseDown={() => setIsModalOpen(false)}>
-          <div className="modal-content" onMouseDown={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <h3>Nueva Cepa</h3>
             <form onSubmit={handleCreate}>
               <input
                 type="text"
                 value={newCepa.nombre}
-                onChange={(e) => setNewCepa({ ...newCepa, nombre: e.target.value })}
+                onChange={(e) =>
+                  setNewCepa({ ...newCepa, nombre: e.target.value })
+                }
                 placeholder="Nombre"
                 required
               />
               <input
                 type="text"
                 value={newCepa.ubicacion}
-                onChange={(e) => setNewCepa({ ...newCepa, ubicacion: e.target.value })}
+                onChange={(e) =>
+                  setNewCepa({ ...newCepa, ubicacion: e.target.value })
+                }
                 placeholder="Ubicación"
               />
               <input
                 type="number"
                 value={newCepa.prioridad}
-                onChange={(e) => setNewCepa({ ...newCepa, prioridad: Number(e.target.value) })}
+                onChange={(e) =>
+                  setNewCepa({ ...newCepa, prioridad: Number(e.target.value) })
+                }
                 placeholder="Prioridad"
               />
               <label>
                 <input
                   type="checkbox"
                   checked={newCepa.activo}
-                  onChange={(e) => setNewCepa({ ...newCepa, activo: e.target.checked })}
-                /> Activo
+                  onChange={(e) =>
+                    setNewCepa({ ...newCepa, activo: e.target.checked })
+                  }
+                />{" "}
+                Activo
               </label>
               <div className="modal-actions">
                 <button type="submit">Crear</button>
-                <button type="button" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                <button type="button" onClick={() => setIsModalOpen(false)}>
+                  Cancelar
+                </button>
               </div>
             </form>
           </div>

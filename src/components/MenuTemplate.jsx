@@ -73,7 +73,9 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
         (user ? productos : productos.filter((p) => p.activo)).length === 0 ? (
           <p>No hay platos disponibles.</p>
         ) : (
-          (user ? productos : productos.filter((p) => p.activo)).map((plato) => (
+          (user ? productos : productos.filter((p) => p.activo))
+          .sort((a, b) => (a.prioridad ?? 9999) - (b.prioridad?? 9999))
+          .map((plato) => (
             <CardPlato
               key={plato.id}
               foto={plato.img}
@@ -102,7 +104,9 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
               <h2>{tipo.charAt(0).toUpperCase() + tipo.slice(1)}</h2>
               {tipo === "tinto" || tipo === "blanco"
                 ? renderProductosPorCepas(productosCat, tipo)
-                : productosCat.map((vino) => (
+                : productosCat
+                .sort((a, b) => (a.prioridad ?? 9999) - (b.prioridad?? 9999))
+                .map((vino) => (
                     <CardVino
                       key={vino.id}
                       nombre={vino.nombre}
@@ -130,7 +134,9 @@ const MenuTemplate = ({ filtroPrincipal, filtroSecundario, categorias, productos
             return (
               <div key={cat.id} id={`cat-${cat.id}`}>
                 <h2>{cat.nombre}</h2>
-                {productosCat.map((p) => {
+                {productosCat
+                .sort((a, b) => (a.prioridad ?? 9999) - (b.prioridad?? 9999))
+                .map((p) => {
                   if (filtroPrincipal.toLowerCase() === "bebidas") {
                     return (
                       <CardBebida

@@ -1,13 +1,24 @@
-import Filtros from '../components/Filtros';
-import MenuTemplate from '../components/MenuTemplate';
-import { useState , useEffect } from 'react';
+import Filtros from "../components/Filtros";
+import MenuTemplate from "../components/MenuTemplate";
+import { useState, useEffect } from "react";
 import { db } from "../firebase/firebaseConfig";
-import { collection, getDocs, query, doc, updateDoc, deleteDoc } from "firebase/firestore";
-import { useAuth } from '../context/AuthContext';
-import CreateProductButton from '../components/admin/CreateProductButton';
-import CategoriasOrdenables from '../components/admin/CategoriasOrdenables';
-import CrearCategoria from '../components/admin/CrearCategoria';
-import CepasOrdenables from '../components/admin/CepasOrdenables';
+import {
+  collection,
+  getDocs,
+  query,
+  doc,
+  updateDoc,
+  deleteDoc,
+  where,
+  orderBy,
+  limit
+} from "firebase/firestore";
+import { useAuth } from "../context/AuthContext";
+import CreateProductButton from "../components/admin/CreateProductButton";
+import CategoriasOrdenables from "../components/admin/CategoriasOrdenables";
+import CrearCategoria from "../components/admin/CrearCategoria";
+import CepasOrdenables from "../components/admin/CepasOrdenables";
+import ProductosOrdenables from "../components/admin/ProductosOrdenables";
 
 const Menu = ({ restauranteId }) => {
   const { isAdmin } = useAuth();
@@ -18,15 +29,41 @@ const Menu = ({ restauranteId }) => {
   const [filtroSecundario, setFiltroSecundario] = useState("null");
 
   // --- Función para obtener los productos y refrescar la lista ---
-  const fetchProductos = async () => {
-    try {
-      const snapProd = await getDocs(query(collection(db, `restaurantes/${restauranteId}/productos`)));
-      const todosLosProductos = snapProd.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setProductos(todosLosProductos);
-    } catch (error) {
-      console.error("Error al obtener productos:", error);
-    }
-  };
+  const fetchDatos = async () => {
+  try {
+    // --- Productos ---
+    const snapProd = await getDocs(
+      collection(db, `restaurantes/${restauranteId}/productos`)
+    );
+    const todosLosProductos = snapProd.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setProductos(todosLosProductos);
+
+    // --- Categorías ---
+    const snapCats = await getDocs(
+      collection(db, `restaurantes/${restauranteId}/categorias`)
+    );
+    const cats = snapCats.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((c) => c.activo !== false);
+    setCategorias(cats);
+
+    // --- Cepas ---
+    const snapCepas = await getDocs(
+      collection(db, `restaurantes/${restauranteId}/cepas`)
+    );
+    const todasLasCepas = snapCepas.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setCepas(todasLasCepas);
+  } catch (err) {
+    console.error("Error al obtener datos:", err);
+  }
+};
+
 
   // Obtener categorías
   useEffect(() => {
@@ -49,9 +86,14 @@ const Menu = ({ restauranteId }) => {
   useEffect(() => {
     const obtenerDatos = async () => {
       try {
-        await fetchProductos(); // obtiene y setea productos
-        const snapCepas = await getDocs(query(collection(db, `restaurantes/${restauranteId}/cepas`)));
-        const todasLasCepas = snapCepas.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        await fetchDatos(); // obtiene y setea productos
+        const snapCepas = await getDocs(
+          query(collection(db, `restaurantes/${restauranteId}/cepas`))
+        );
+        const todasLasCepas = snapCepas.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         setCepas(todasLasCepas);
       } catch (error) {
         console.error("Error al obtener datos:", error);
@@ -62,13 +104,16 @@ const Menu = ({ restauranteId }) => {
 
   // Filtrado de productos
   const productosFiltrados = productos.filter(
-    (p) => (p.clasificacion || "").toLowerCase() === filtroPrincipal.toLowerCase()
+    (p) =>
+      (p.clasificacion || "").toLowerCase() === filtroPrincipal.toLowerCase()
   );
 
   const productosFiltradosPlatos = productosFiltrados.filter((plato) => {
     if (filtroPrincipal.toLowerCase() === "menú") {
-      if (filtroSecundario === "sinGluten") return plato.sinGluten || plato.opSinGluten || false;
-      if (filtroSecundario === "veggie") return plato.veggie || plato.opVeggie || false;
+      if (filtroSecundario === "sinGluten")
+        return plato.sinGluten || plato.opSinGluten || false;
+      if (filtroSecundario === "veggie")
+        return plato.veggie || plato.opVeggie || false;
       return true;
     }
     return true;
@@ -77,7 +122,10 @@ const Menu = ({ restauranteId }) => {
   const guardarCambios = async (nuevasCategorias) => {
     try {
       const updates = nuevasCategorias.map(async (cat) => {
-        const ref = doc(db, `restaurantes/${restauranteId}/categorias/${cat.id}`);
+        const ref = doc(
+          db,
+          `restaurantes/${restauranteId}/categorias/${cat.id}`
+        );
         await updateDoc(ref, {
           prioridad: cat.prioridad ?? 0,
         });
@@ -92,32 +140,43 @@ const Menu = ({ restauranteId }) => {
   };
 
   const eliminarCategoria = async (categoriaId) => {
-  try {
-    const confirm = window.confirm("¿Seguro que deseas eliminar esta categoría?");
-    if (!confirm) return;
+    try {
+      const confirm = window.confirm(
+        "¿Seguro que deseas eliminar esta categoría?"
+      );
+      if (!confirm) return;
 
-    const ref = doc(db, `restaurantes/${restauranteId}/categorias/${categoriaId}`);
-    await deleteDoc(ref);
+      const ref = doc(
+        db,
+        `restaurantes/${restauranteId}/categorias/${categoriaId}`
+      );
+      await deleteDoc(ref);
 
-    // Refrescar categorías
-    const refCats = collection(db, `restaurantes/${restauranteId}/categorias`);
-    const querySnapshot = await getDocs(refCats);
-    const cats = querySnapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() }))
-      .filter((c) => c.activo !== false);
-    setCategorias(cats);
+      // Refrescar categorías
+      const refCats = collection(
+        db,
+        `restaurantes/${restauranteId}/categorias`
+      );
+      const querySnapshot = await getDocs(refCats);
+      const cats = querySnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((c) => c.activo !== false);
+      setCategorias(cats);
 
-    alert("✅ Categoría eliminada correctamente");
-  } catch (err) {
-    console.error("Error al eliminar categoría:", err);
-    alert("❌ Hubo un error al eliminar la categoría.");
-  }
-};
+      alert("✅ Categoría eliminada correctamente");
+    } catch (err) {
+      console.error("Error al eliminar categoría:", err);
+      alert("❌ Hubo un error al eliminar la categoría.");
+    }
+  };
 
   return (
     <div className="menu">
       <header className="logo">
-        <img src="https://firebasestorage.googleapis.com/v0/b/bruta2.firebasestorage.app/o/Home%2Flogo.png?alt=media&token=4c38cade-3f8c-41b4-97b1-b4769140d586" alt="Bruta Logo" />
+        <img
+          src="https://firebasestorage.googleapis.com/v0/b/bruta2.firebasestorage.app/o/Home%2Flogo.png?alt=media&token=4c38cade-3f8c-41b4-97b1-b4769140d586"
+          alt="Bruta Logo"
+        />
       </header>
 
       <div className="filtros-container">
@@ -126,59 +185,94 @@ const Menu = ({ restauranteId }) => {
           filtroPrincipal={filtroPrincipal}
           setFiltroPrincipal={setFiltroPrincipal}
           filtroSecundario={filtroSecundario}
-          setFiltroSecundario={setFiltroSecundario} 
+          setFiltroSecundario={setFiltroSecundario}
         />
       </div>
       {isAdmin && (
-  <CrearCategoria 
-    restauranteId={restauranteId} 
-    onCreate={() => {
-      // Refrescar categorías desde Firebase
-      const refCats = collection(db, `restaurantes/${restauranteId}/categorias`);
-      getDocs(refCats).then((querySnapshot) => {
-        const cats = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setCategorias(cats);
-      });
-    }}
-  />
-)}
-
-<CategoriasOrdenables categorias={categorias} onSave={guardarCambios} onDelete={eliminarCategoria} />
-{isAdmin && (
-  <CepasOrdenables
-    restauranteId={restauranteId}
-    cepas={cepas}
-    onSave={async (nuevasCepas) => {
+        <CrearCategoria
+          restauranteId={restauranteId}
+          onCreate={() => {
+            // Refrescar categorías desde Firebase
+            const refCats = collection(
+              db,
+              `restaurantes/${restauranteId}/categorias`
+            );
+            getDocs(refCats).then((querySnapshot) => {
+              const cats = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }));
+              setCategorias(cats);
+            });
+          }}
+        />
+      )}
+      {isAdmin && (
+      <CategoriasOrdenables
+        categorias={categorias}
+        onSave={async (nuevasCategorias) => {
       try {
-        const updates = nuevasCepas.map(c => {
+        const updates = nuevasCategorias.map((cat) => {
+          const ref = doc(db, `restaurantes/${restauranteId}/categorias/${cat.id}`);
+          return updateDoc(ref, { prioridad: cat.prioridad ?? 0 });
+        });
+        await Promise.all(updates);
+        alert("✅ Prioridades actualizadas correctamente");
+        await fetchDatos(); // 🔄 refresca productos y categorías
+      } catch (err) {
+        console.error("Error al actualizar prioridades:", err);
+        alert("❌ Hubo un error al guardar los cambios.");
+      }
+    }}
+        onDelete={async (categoriaId) => {
+      await eliminarCategoria(categoriaId);
+      await fetchDatos(); // 🔄 refresca también después de eliminar
+    }}
+      />
+      )}
+      {isAdmin && (
+        <CepasOrdenables
+          restauranteId={restauranteId}
+          cepas={cepas}
+          onSave={async (nuevasCepas) => {
+      try {
+        const updates = nuevasCepas.map((c) => {
           const ref = doc(db, `restaurantes/${restauranteId}/cepas/${c.id}`);
           return updateDoc(ref, { prioridad: c.prioridad ?? 0 });
         });
         await Promise.all(updates);
         alert("✅ Prioridades de cepas actualizadas");
+        await fetchDatos(); // 🔄 refresca productos y cepas
       } catch (err) {
         console.error(err);
         alert("❌ Error al guardar prioridades de cepas");
       }
     }}
+        />
+      )}
+{isAdmin && (
+  <ProductosOrdenables
+    restauranteId={restauranteId}
+    productos={productos}
+    categorias={categorias}
+    onSave={fetchDatos} // refresca productos después de guardar prioridades
   />
 )}
-
       {isAdmin && (
-        <CreateProductButton 
-          cepas={cepas} 
-          categorias={categorias} 
-          onCreate={fetchProductos} // refresca productos al crear
+        <CreateProductButton
+          cepas={cepas}
+          categorias={categorias}
+          onCreate={fetchDatos} // refresca productos al crear
         />
       )}
 
-      <MenuTemplate 
+      <MenuTemplate
         filtroPrincipal={filtroPrincipal}
         filtroSecundario={filtroSecundario}
         categorias={categorias}
         productos={productosFiltradosPlatos}
-        cepas={cepas} 
-        fetchProductos={fetchProductos} // pasamos la función para borrar productos
+        cepas={cepas}
+        fetchProductos={fetchDatos} // pasamos la función para borrar productos
       />
     </div>
   );

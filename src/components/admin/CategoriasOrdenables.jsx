@@ -3,6 +3,8 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const CategoriasOrdenables = ({ categorias = [], onSave, onDelete }) => {
   const [data, setData] = useState({});
+  const [openGroup, setOpenGroup] = useState(null);
+  const [isOpen, setIsOpen] = useState(false); // 👉 controla el desplegable principal
 
   useEffect(() => {
     const grupos = {};
@@ -18,8 +20,6 @@ const CategoriasOrdenables = ({ categorias = [], onSave, onDelete }) => {
 
     setData(grupos);
   }, [categorias]);
-
-  const [openGroup, setOpenGroup] = useState(null);
 
   const handleDragEnd = (result, ubicacion) => {
     if (!result.destination) return;
@@ -37,13 +37,12 @@ const CategoriasOrdenables = ({ categorias = [], onSave, onDelete }) => {
   };
 
   const handleSave = () => {
-    // Construimos un array plano con los cambios de prioridad
     const cambios = [];
     Object.keys(data).forEach((ubicacion) => {
       data[ubicacion].forEach((cat, index) => {
         cambios.push({
           ...cat,
-          prioridad: index, // la prioridad será el nuevo orden
+          prioridad: index,
         });
       });
     });
@@ -58,76 +57,93 @@ const CategoriasOrdenables = ({ categorias = [], onSave, onDelete }) => {
 
   return (
     <div className="categorias-admin">
-      <h3>Ordenar categorías</h3>
-      {Object.keys(data).map((ubicacion) => {
-        if (ubicacion.toLowerCase() === "menú") return null; // saltar "menú"
-        return (
-          <div key={ubicacion} className="ubicacion-group">
-            <button
-              className="toggle-group"
-              onClick={() =>
-                setOpenGroup(openGroup === ubicacion ? null : ubicacion)
-              }
-            >
-              {openGroup === ubicacion ? "▼" : "▶"} {ubicacion}
-            </button>
+      {/* 🔽 Botón/título para abrir/cerrar el menú */}
+      <h3
+        className="toggle-main"
+        onClick={() => setIsOpen(!isOpen)}
+        style={{ cursor: "pointer" }}
+      >
+        {isOpen ? "▼" : "▶"} Ordenar categorías
+      </h3>
 
-            {openGroup === ubicacion && (
-              <DragDropContext
-                onDragEnd={(result) => handleDragEnd(result, ubicacion)}
-              >
-                <Droppable droppableId={ubicacion}>
-                  {(provided) => (
-                    <ul
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      className="categorias-list"
-                    >
-                      {data[ubicacion].map((cat, index) => (
-                        <Draggable
-                          key={cat.id}
-                          draggableId={cat.id}
-                          index={index}
+      {isOpen && (
+        <div className="categorias-content">
+          {Object.keys(data).map((ubicacion) => {
+            if (ubicacion.toLowerCase() === "menú") return null;
+            return (
+              <div key={ubicacion} className="ubicacion-group">
+                <button
+                  className="toggle-group"
+                  onClick={() =>
+                    setOpenGroup(openGroup === ubicacion ? null : ubicacion)
+                  }
+                >
+                  {openGroup === ubicacion ? "▼" : "▶"} {ubicacion}
+                </button>
+
+                {openGroup === ubicacion && (
+                  <DragDropContext
+                    onDragEnd={(result) => handleDragEnd(result, ubicacion)}
+                  >
+                    <Droppable droppableId={ubicacion}>
+                      {(provided) => (
+                        <ul
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          className="categorias-list"
                         >
-                          {(provided) => (
-                            <li
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className="categoria-item"
+                          {data[ubicacion].map((cat, index) => (
+                            <Draggable
+                              key={cat.id}
+                              draggableId={cat.id}
+                              index={index}
                             >
-                              {cat.nombre}{" "}
-                              <span className="prioridad">
-                                (prioridad: {cat.prioridad ?? index})
-                              </span>
-                              <button
-                              className="btn-delete"
-                              onClick={() => {
-                                if (window.confirm(`¿Eliminar categoría "${cat.nombre}"? Esta acción no se puede deshacer.`)) {
-                                  if (typeof onDelete === "function") {
-                                    onDelete(cat.id);
-                                  }
-                                }
-                              }}>
-                                🗑️
-                              </button>
-                            </li>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </ul>
-                  )}
-                </Droppable>
-              </DragDropContext>
-            )}
-          </div>
-        );
-      })}
+                              {(provided) => (
+                                <li
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className="categoria-item"
+                                >
+                                  {cat.nombre}{" "}
+                                  <span className="prioridad">
+                                    (prioridad: {cat.prioridad ?? index})
+                                  </span>
+                                  <button
+                                    className="btn-delete"
+                                    onClick={() => {
+                                      if (
+                                        window.confirm(
+                                          `¿Eliminar categoría "${cat.nombre}"? Esta acción no se puede deshacer.`
+                                        )
+                                      ) {
+                                        if (typeof onDelete === "function") {
+                                          onDelete(cat.id);
+                                        }
+                                      }
+                                    }}
+                                  >
+                                    🗑️
+                                  </button>
+                                </li>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </ul>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                )}
+              </div>
+            );
+          })}
 
-      <button className="btn-save" onClick={handleSave}>
-        Guardar cambios
-      </button>
+          <button className="btn-save" onClick={handleSave}>
+            Guardar cambios
+          </button>
+        </div>
+      )}
     </div>
   );
 };
