@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import ProductForm from "./ProductForm";
 
-const CreateProductButton = ({ categorias, cepas, onCreate }) => {
+const CreateProductButton = ({ categorias, cepas, onCreate, banderas }) => {
   const { isAdmin, restauranteId } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -28,6 +28,7 @@ const CreateProductButton = ({ categorias, cepas, onCreate }) => {
               cepas={cepas}
               onCreated={onCreate}
               closeModal={closeModal}
+              banderas={banderas}
             />
           </div>
         </div>

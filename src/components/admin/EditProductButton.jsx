@@ -5,7 +5,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 import { useAuth } from "../../context/AuthContext";
 
-const EditProductButton = ({ product, onUpdated }) => {
+const EditProductButton = ({ product, onUpdated,banderas }) => {
   const { isAdmin, restauranteId } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -17,6 +17,8 @@ const EditProductButton = ({ product, onUpdated }) => {
     veggie: false,
     sinGluten: false,
     activo: false,
+    origen: "",
+    clasificacion: "",
   });
 
   useEffect(() => {
@@ -30,6 +32,8 @@ const EditProductButton = ({ product, onUpdated }) => {
       veggie: !!product.veggie,
       sinGluten: !!product.sinGluten,
       activo: !!product.activo,
+      origen: product.origen || "",
+      clasificacion: product.clasificacion?.toLowerCase() || "",
     });
   }
   }, [product]);
@@ -71,7 +75,11 @@ const EditProductButton = ({ product, onUpdated }) => {
         picante: !!formData.picante,
         veggie: !!formData.veggie,
         sinGluten: !!formData.sinGluten,
+        clasificacion: formData.clasificacion?.toLowerCase() || "",
         activo: !!formData.activo,
+        ...(product.clasificacion?.toLowerCase() === "vinos" && {
+          origen: formData.origen || "",
+        })
       });
 
       setLoading(false);
@@ -136,6 +144,45 @@ const EditProductButton = ({ product, onUpdated }) => {
             required
             style={{ width: "100%", marginBottom: 8, padding: 8 }}
           />
+          <div style={{ margin: "12px 0" }}>
+            <label>
+              Clasificación:
+              <select
+                name="clasificacion"
+                value={formData.clasificacion}
+                onChange={handleChange}
+                style={{ width: "100%", padding: 8, marginTop: 4 }}
+              >
+                <option value="">Seleccionar...</option>
+                <option value="vinos">Vino</option>
+                <option value="menú">Plato</option>
+                <option value="bebidas">Bebida</option>
+                <option value="postres y digestivos">Postres y Digestivos</option>
+                {/* Podés sumar más según tu app */}
+              </select>
+            </label>
+          </div>
+          {formData.clasificacion?.toLowerCase() === "vinos" && (
+            <div style={{margin: "12px 0" }}>
+              <label>
+                Origen:
+                <select
+                  name="origen"
+                  value={formData.origen}
+                  onChange={handleChange}
+                  style={{ width: "100%", marginTop: 4, padding: 8 }}
+                >
+                  <option value="">-- Seleccioná un origen --</option>
+                  {banderas?.map((band) => (
+                    <option key={band.nombre} value={band.nombre}>
+                      {band.nombre}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
+
           <textarea
             name="descripcion"
             value={formData.descripcion}
@@ -153,6 +200,7 @@ const EditProductButton = ({ product, onUpdated }) => {
             style={{ width: "100%", marginBottom: 8, padding: 8 }}
           />
 
+          
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 8 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <input type="checkbox" name="picante" checked={formData.picante} onChange={handleChange} />

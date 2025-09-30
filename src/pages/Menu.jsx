@@ -1,7 +1,8 @@
 import Filtros from "../components/Filtros";
 import MenuTemplate from "../components/MenuTemplate";
 import { useState, useEffect } from "react";
-import { db } from "../firebase/firebaseConfig";
+import { db, storage } from "../firebase/firebaseConfig";
+import { ref, listAll, getDownloadURL } from "firebase/storage";
 import {
   collection,
   getDocs,
@@ -27,8 +28,29 @@ const Menu = ({ restauranteId }) => {
   const [cepas, setCepas] = useState([]);
   const [filtroPrincipal, setFiltroPrincipal] = useState("Bebidas");
   const [filtroSecundario, setFiltroSecundario] = useState("null");
+  const [banderas, setBanderas] = useState([]);
 
-  // --- Función para obtener los productos y refrescar la lista ---
+  const fetchBanderas = async () => {
+  const folderRef = ref(storage, "banderas/");
+  const result = await listAll(folderRef);
+
+  const banderas = await Promise.all(
+    result.items.map(async (itemRef) => {
+      const url = await getDownloadURL(itemRef);
+      // nombre del archivo como "uruguay.png" → usamos el nombre sin extensión
+      const nombre = itemRef.name.split(".")[0];
+      return { nombre, url };
+    })
+  );
+
+setBanderas(banderas);
+};
+
+  useEffect(() => {
+    fetchBanderas();
+  }, []); // se ejecuta solo una vez al montar el componente
+
+// --- Función para obtener los productos y refrescar la lista ---
   const fetchDatos = async () => {
   try {
     // --- Productos ---
@@ -263,6 +285,7 @@ const Menu = ({ restauranteId }) => {
           cepas={cepas}
           categorias={categorias}
           onCreate={fetchDatos} // refresca productos al crear
+          banderas={banderas}
         />
       )}
 
@@ -273,6 +296,7 @@ const Menu = ({ restauranteId }) => {
         productos={productosFiltradosPlatos}
         cepas={cepas}
         fetchProductos={fetchDatos} // pasamos la función para borrar productos
+        banderas={banderas}
       />
     </div>
   );

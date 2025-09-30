@@ -3,7 +3,14 @@ import React, { useState } from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 
-const ProductForm = ({ restauranteId, categorias, cepas, onCreated, closeModal }) => {
+const ProductForm = ({
+  restauranteId,
+  categorias,
+  cepas,
+  banderas,
+  onCreated,
+  closeModal,
+}) => {
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
@@ -16,6 +23,7 @@ const ProductForm = ({ restauranteId, categorias, cepas, onCreated, closeModal }
     clasificacion: "",
     categoria: "",
     cepa: "",
+    origen: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +39,11 @@ const ProductForm = ({ restauranteId, categorias, cepas, onCreated, closeModal }
     e.preventDefault();
     setLoading(true);
     try {
-      const productsRef = doc(db, `restaurantes/${restauranteId}/productos`, formData.nombre);
+      const productsRef = doc(
+        db,
+        `restaurantes/${restauranteId}/productos`,
+        formData.nombre
+      );
       await setDoc(productsRef, {
         nombre: formData.nombre,
         descripcion: formData.descripcion,
@@ -44,6 +56,7 @@ const ProductForm = ({ restauranteId, categorias, cepas, onCreated, closeModal }
         clasificacion: formData.clasificacion,
         cat: formData.clasificacion === "menú" ? null : formData.categoria,
         cepa: formData.clasificacion === "vinos" ? formData.cepa : null,
+        origen: formData.clasificacion === "vinos" ? formData.origen : null,
         createdAt: new Date(),
       });
       setLoading(false);
@@ -109,26 +122,28 @@ const ProductForm = ({ restauranteId, categorias, cepas, onCreated, closeModal }
       </select>
 
       {/* Categoría solo si NO es Menú */}
-      {formData.clasificacion && formData.clasificacion.toLowerCase() !== "menú" && (
-        <select
-          name="categoria"
-          value={formData.categoria}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Seleccionar categoría</option>
-          {categorias
-            ?.filter(
-              (cat) =>
-                cat.ubicacion.toLowerCase() === formData.clasificacion.toLowerCase()
-            )
-            .map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.nombre}
-              </option>
-            ))}
-        </select>
-      )}
+      {formData.clasificacion &&
+        formData.clasificacion.toLowerCase() !== "menú" && (
+          <select
+            name="categoria"
+            value={formData.categoria}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Seleccionar categoría</option>
+            {categorias
+              ?.filter(
+                (cat) =>
+                  cat.ubicacion.toLowerCase() ===
+                  formData.clasificacion.toLowerCase()
+              )
+              .map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.nombre}
+                </option>
+              ))}
+          </select>
+        )}
 
       {/* Cepa solo para vinos */}
       {formData.clasificacion === "vinos" && (
@@ -146,7 +161,22 @@ const ProductForm = ({ restauranteId, categorias, cepas, onCreated, closeModal }
           ))}
         </select>
       )}
-
+      {/* Origen solo para vinos */}
+      {formData.clasificacion === "vinos" && (
+        <select
+          name="origen"
+          value={formData.origen}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Seleccionar origen</option>
+          {banderas?.map((bandera, idx) => (
+            <option key={idx} value={bandera.url}>
+              {bandera.nombre}
+            </option>
+          ))}
+        </select>
+      )}
       <label>
         <input
           type="checkbox"
